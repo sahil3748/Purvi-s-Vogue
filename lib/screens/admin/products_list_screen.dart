@@ -5,6 +5,39 @@ import 'package:intl/intl.dart';
 class ProductsListScreen extends StatelessWidget {
   const ProductsListScreen({super.key});
 
+  Future<void> _deleteProduct(BuildContext context, String productId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Product'),
+        content: const Text('Are you sure you want to delete this product?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('DELETE'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await firestore.FirebaseFirestore.instance
+          .collection('products')
+          .doc(productId)
+          .delete();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Product deleted successfully')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(symbol: '₹', decimalDigits: 2);
@@ -12,6 +45,16 @@ class ProductsListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Products'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // TODO: Navigate to add product screen
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Add product functionality coming soon')),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
       body: StreamBuilder<firestore.QuerySnapshot>(
         stream: firestore.FirebaseFirestore.instance
@@ -28,16 +71,28 @@ class ProductsListScreen extends StatelessWidget {
 
           final products = snapshot.data?.docs ?? [];
 
+          if (products.isEmpty) {
+            return const Center(
+              child: Text('No products available'),
+            );
+          }
+
           return ListView.builder(
             padding: const EdgeInsets.all(8),
             itemCount: products.length,
             itemBuilder: (context, index) {
               final product = products[index].data() as Map<String, dynamic>;
+              final productId = products[index].id;
+
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 child: InkWell(
                   onTap: () {
                     // TODO: Navigate to product details
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Product details coming soon')),
+                    );
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -52,11 +107,23 @@ class ProductsListScreen extends StatelessWidget {
                             width: 100,
                             height: 100,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const SizedBox(
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
                                 width: 100,
                                 height: 100,
-                                child: Center(child: Icon(Icons.error)),
+                                color: Colors.grey[200],
+                                child: const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 100,
+                                height: 100,
+                                color: Colors.grey[200],
+                                child: const Icon(Icons.error),
                               );
                             },
                           ),
@@ -67,9 +134,57 @@ class ProductsListScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                product['name'] as String,
-                                style: Theme.of(context).textTheme.titleMedium,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      product['name'] as String,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                  ),
+                                  PopupMenuButton<String>(
+                                    onSelected: (value) {
+                                      switch (value) {
+                                        case 'edit':
+                                          // TODO: Navigate to edit product
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Edit functionality coming soon')),
+                                          );
+                                          break;
+                                        case 'delete':
+                                          _deleteProduct(context, productId);
+                                          break;
+                                      }
+                                    },
+                                    itemBuilder: (context) => [
+                                      const PopupMenuItem(
+                                        value: 'edit',
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.edit),
+                                            SizedBox(width: 8),
+                                            Text('Edit'),
+                                          ],
+                                        ),
+                                      ),
+                                      const PopupMenuItem(
+                                        value: 'delete',
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.delete),
+                                            SizedBox(width: 8),
+                                            Text('Delete'),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -111,9 +226,41 @@ class ProductsListScreen extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 4),
-                              Text(
-                                'Stock: ${product['stockQuantity']}',
-                                style: Theme.of(context).textTheme.bodySmall,
+                              Row(
+                                children: [
+                                  Text(
+                                    'Stock: ${product['stockQuantity']}',
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          (product['stockQuantity'] as num) > 0
+                                              ? Colors.green[100]
+                                              : Colors.red[100],
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      (product['stockQuantity'] as num) > 0
+                                          ? 'In Stock'
+                                          : 'Out of Stock',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: (product['stockQuantity']
+                                                        as num) >
+                                                    0
+                                                ? Colors.green[900]
+                                                : Colors.red[900],
+                                          ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

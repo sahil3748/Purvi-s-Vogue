@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../models/variant.dart';
 import '../config/appwrite_config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AppwriteService {
   late final Databases _databases;
@@ -215,36 +216,51 @@ class FirebaseService {
 
   // Upload categories to Firebase
   Future<void> uploadCategories(List<Map<String, dynamic>> categories) async {
-    final batch = _firestore.batch();
+    try {
+      final batch = _firestore.batch();
 
-    for (final category in categories) {
-      final docRef = _firestore.collection('categories').doc(category['id']);
-      batch.set(docRef, category);
+      for (final category in categories) {
+        final docRef = _firestore.collection('categories').doc(category['id']);
+        batch.set(docRef, category);
+      }
+
+      await batch.commit();
+    } catch (e) {
+      print('Error uploading categories: $e');
+      rethrow;
     }
-
-    await batch.commit();
   }
 
   // Upload products to Firebase
   Future<void> uploadProducts(List<Map<String, dynamic>> products) async {
-    final batch = _firestore.batch();
+    try {
+      final batch = _firestore.batch();
 
-    for (final product in products) {
-      final docRef = _firestore.collection('products').doc(product['id']);
-      batch.set(docRef, product);
+      for (final product in products) {
+        final docRef = _firestore.collection('products').doc(product['id']);
+        batch.set(docRef, product);
+      }
+
+      await batch.commit();
+    } catch (e) {
+      print('Error uploading products: $e');
+      rethrow;
     }
-
-    await batch.commit();
   }
 
   // Check if data already exists
   Future<bool> isDataAlreadyUploaded() async {
-    final categoriesSnapshot =
-        await _firestore.collection('categories').limit(1).get();
-    final productsSnapshot =
-        await _firestore.collection('products').limit(1).get();
+    try {
+      final categoriesSnapshot =
+          await _firestore.collection('categories').limit(1).get();
+      final productsSnapshot =
+          await _firestore.collection('products').limit(1).get();
 
-    return categoriesSnapshot.docs.isNotEmpty ||
-        productsSnapshot.docs.isNotEmpty;
+      return categoriesSnapshot.docs.isNotEmpty ||
+          productsSnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error checking data existence: $e');
+      return false;
+    }
   }
 }
