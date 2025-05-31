@@ -2,16 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:purvis_vogue/config/appwrite_config.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:purvis_vogue/services/storage_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyDSFsvCs2r3DJJ9SS5Gwp2j91ipubiwKFA",
+      authDomain: "purvis-vogue.firebaseapp.com",
+      projectId: "purvis-vogue",
+      storageBucket: "purvis-vogue.firebasestorage.app",
+      messagingSenderId: "1089784102705",
+      appId: "1:1089784102705:web:ba5e6d41fe86563c377a10",
+      measurementId: "G-889YVQPLS4",
+    ),
+  );
+
+  // Initialize Firebase Analytics
+  final analytics = FirebaseAnalytics.instance;
+
   // Initialize Appwrite
   Client client = AppwriteConfig.getClient();
-  
+
   // Initialize Storage
   final storage = Storage(client);
-  
+
   final storageService = StorageService();
 
   // Example: Upload a file
@@ -25,7 +43,7 @@ void main() async {
   // } catch (e) {
   //   print('Error uploading file: $e');
   // }
-  
+
   runApp(const MyApp());
 }
 
@@ -145,3 +163,26 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+
+// Import the functions you need from the SDKs you need
+// import { initializeApp } from "firebase/app";
+// import { getAnalytics } from "firebase/analytics";
+// // TODO: Add SDKs for Firebase products that you want to use
+// // https://firebase.google.com/docs/web/setup#available-libraries
+
+// // Your web app's Firebase configuration
+// // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// const firebaseConfig = {
+//   apiKey: "AIzaSyDSFsvCs2r3DJJ9SS5Gwp2j91ipubiwKFA",
+//   authDomain: "purvis-vogue.firebaseapp.com",
+//   projectId: "purvis-vogue",
+//   storageBucket: "purvis-vogue.firebasestorage.app",
+//   messagingSenderId: "1089784102705",
+//   appId: "1:1089784102705:web:ba5e6d41fe86563c377a10",
+//   measurementId: "G-889YVQPLS4"
+// };
+
+// // Initialize Firebase
+// const app = initializeApp(firebaseConfig);
+// const analytics = getAnalytics(app);

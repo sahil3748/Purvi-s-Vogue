@@ -1,1 +1,39 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"purvis-vogue","appId":"1:1089784102705:android:5e21560994aec055377a10","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"purvis-vogue","configurations":{"android":"1:1089784102705:android:5e21560994aec055377a10","ios":"1:1089784102705:ios:5249256772f6682b377a10","macos":"1:1089784102705:ios:5249256772f6682b377a10","web":"1:1089784102705:web:ba5e6d41fe86563c377a10","windows":"1:1089784102705:web:54b6eefe34d4fc50377a10"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "purvis-vogue",
+          "appId": "1:1089784102705:android:5e21560994aec055377a10",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "purvis-vogue",
+          "configurations": {
+            "android": "1:1089784102705:android:5e21560994aec055377a10",
+            "ios": "1:1089784102705:ios:5249256772f6682b377a10",
+            "macos": "1:1089784102705:ios:5249256772f6682b377a10",
+            "web": "1:1089784102705:web:ba5e6d41fe86563c377a10",
+            "windows": "1:1089784102705:web:54b6eefe34d4fc50377a10"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

@@ -31,6 +31,27 @@
 
   <title>purvis_vogue</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics.js"></script>
+
+  <script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDSFsvCs2r3DJJ9SS5Gwp2j91ipubiwKFA",
+      authDomain: "purvis-vogue.firebaseapp.com",
+      projectId: "purvis-vogue",
+      storageBucket: "purvis-vogue.firebasestorage.app",
+      messagingSenderId: "1089784102705",
+      appId: "1:1089784102705:web:ba5e6d41fe86563c377a10",
+      measurementId: "G-889YVQPLS4"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
