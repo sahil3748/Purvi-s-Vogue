@@ -1,88 +1,66 @@
 import 'dart:typed_data';
 import 'package:appwrite/appwrite.dart';
-import 'package:purvis_vogue/config/appwrite_config.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:image_picker/image_picker.dart';
+import '../config/appwrite_config.dart';
 
 class StorageService {
   late final Storage _storage;
-  
+  final ImagePicker _picker = ImagePicker();
+
   StorageService() {
     final client = AppwriteConfig.getClient();
     _storage = Storage(client);
   }
 
-  // Upload a file
-  Future<String> uploadFile({
-    required String bucketId,
-    required String fileId,
-    required Uint8List fileBytes,
-    List<String>? permissions,
-  }) async {
+  Future<String?> pickAndUploadImage(String folder) async {
+    if (kIsWeb) {
+      throw Exception('Image upload is not allowed in web version');
+    }
+
     try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image == null) return null;
+
+      final bytes = await image.readAsBytes();
+      final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final String fileId = '$folder-$timestamp';
+
       final result = await _storage.createFile(
-        bucketId: bucketId,
+        bucketId: AppwriteConfig.storageBucketId,
         fileId: fileId,
-        file: InputFile.fromBytes(bytes: fileBytes, filename: fileId),
-        permissions: permissions,
+        file: InputFile.fromBytes(
+          bytes: bytes,
+          filename: image.name,
+        ),
       );
-      return result.$id;
+
+      // Get the file view URL
+      final String fileUrl =
+          '${AppwriteConfig.endpoint}/storage/buckets/${AppwriteConfig.storageBucketId}/files/${result.$id}/view';
+      return fileUrl;
     } catch (e) {
-      throw Exception('Failed to upload file: $e');
+      print('Error uploading image: $e');
+      return null;
     }
   }
 
-  // Delete a file
-  Future<void> deleteFile({
-    required String bucketId,
-    required String fileId,
-  }) async {
+  Future<void> deleteImage(String imageUrl) async {
+    if (kIsWeb) {
+      throw Exception('Image deletion is not allowed in web version');
+    }
+
     try {
+      // Extract fileId from the URL
+      final uri = Uri.parse(imageUrl);
+      final fileId = uri.pathSegments.last;
+
       await _storage.deleteFile(
-        bucketId: bucketId,
+        bucketId: AppwriteConfig.storageBucketId,
         fileId: fileId,
       );
     } catch (e) {
-      throw Exception('Failed to delete file: $e');
+      print('Error deleting image: $e');
     }
   }
-
-  // Get file preview URL
-  String getFilePreview({
-    required String bucketId,
-    required String fileId,
-  }) {
-    return _storage.getFilePreview(
-      bucketId: bucketId,
-      fileId: fileId,
-    ).toString();
-  }
-
-  // Download file
-  Future<Uint8List> downloadFile({
-    required String bucketId,
-    required String fileId,
-  }) async {
-    try {
-      final response = await _storage.getFileDownload(
-        bucketId: bucketId,
-        fileId: fileId,
-      );
-      return response;
-    } catch (e) {
-      throw Exception('Failed to download file: $e');
-    }
-  }
-
-  // List files in a bucket
-  Future<List> listFiles({
-    required String bucketId,
-  }) async {
-    try {
-      final response = await _storage.listFiles(
-        bucketId: bucketId,
-      );
-      return response.files;
-    } catch (e) {
-      throw Exception('Failed to list files: $e');
-    }
-  }
-} 
+}
