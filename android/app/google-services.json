@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1089784102705",
+    "project_id": "purvis-vogue",
+    "storage_bucket": "purvis-vogue.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1089784102705:android:5e21560994aec055377a10",
+        "android_client_info": {
+          "package_name": "com.example.purvis_vogue"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDe8hLgWvPTHYAJRR3I7vgtKHY-ZrWr4aI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
